@@ -1,0 +1,4 @@
+/* Remove or keep minimal global overrides */
+#root {
+    min-height: 100vh;
+}

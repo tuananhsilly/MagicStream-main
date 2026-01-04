@@ -1,0 +1,102 @@
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    background: transparent;
+}
+
+.spinner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.spinner-logo-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.spinner-ring,
+.spinner-ring-delay {
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-top-color: #3B82F6;
+    border-right-color: #3B82F6;
+    border-radius: 50%;
+    animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner-ring-delay {
+    border-top-color: #60A5FA;
+    border-right-color: #60A5FA;
+    animation-delay: -0.4s;
+    animation-duration: 1.5s;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-text {
+    color: #94A3B8;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0;
+    animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .spinner-logo,
+    .spinner-ring,
+    .spinner-ring-delay,
+    .spinner-text {
+        animation: none;
+    }
+    
+    .spinner-ring,
+    .spinner-ring-delay {
+        opacity: 0.3;
+    }
+}
