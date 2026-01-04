@@ -1,7 +1,9 @@
 import Movie from '../movie/Movie';
 import './Movies.css';
 
-const Movies = ({ movies, updateMovieReview, message }) => {
+const Movies = ({ movies, updateMovieReview, message, total }) => {
+    const displayCount = total !== undefined ? total : movies?.length || 0;
+    
     return (
         <div className="movies-section">
             <div className="movies-container">
@@ -12,7 +14,7 @@ const Movies = ({ movies, updateMovieReview, message }) => {
                                 {updateMovieReview ? 'All Movies' : 'Recommended For You'}
                             </h2>
                             <p className="section-subtitle">
-                                {movies.length} {movies.length === 1 ? 'movie' : 'movies'} available
+                                {displayCount} {displayCount === 1 ? 'movie' : 'movies'} {total !== undefined ? 'found' : 'available'}
                             </p>
                         </div>
                         

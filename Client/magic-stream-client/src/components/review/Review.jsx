@@ -8,8 +8,9 @@ import Spinner from '../spinner/Spinner';
 import './Review.css';
 
 const Review = () => {
-    const [movie, setMovie] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [movie, setMovie] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     const revText = useRef();
@@ -19,19 +20,47 @@ const Review = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Abort controller to prevent race conditions
+        const abortController = new AbortController();
+        
         const fetchMovie = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosPrivate.get(`/movie/${imdb_id}`);
-                setMovie(response.data);
-            } catch (error) {
-                console.error('Error fetching movie:', error);
-            } finally {
+            // Only fetch if we have imdb_id
+            if (!imdb_id) {
+                setError('Movie ID is required');
                 setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            setError(null);
+            
+            try {
+                const response = await axiosPrivate.get(`/movie/${imdb_id}`, {
+                    signal: abortController.signal
+                });
+                
+                if (!abortController.signal.aborted) {
+                    setMovie(response.data);
+                }
+            } catch (err) {
+                if (!abortController.signal.aborted) {
+                    console.error('Error fetching movie:', err);
+                    setError(err.response?.data?.error || 'Failed to load movie');
+                }
+            } finally {
+                if (!abortController.signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
+        
         fetchMovie();
-    }, [imdb_id, axiosPrivate]);
+        
+        // Cleanup: abort request if component unmounts or imdb_id changes
+        return () => {
+            abortController.abort();
+        };
+    }, [imdb_id]); // Removed axiosPrivate from dependencies to prevent re-fetches
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -47,7 +76,8 @@ const Review = () => {
                 ...prev,
                 admin_review: response.data?.admin_review ?? prev.admin_review,
                 ranking: {
-                    ranking_name: response.data?.ranking_name ?? prev.ranking?.ranking_name
+                    ranking_name: response.data?.ranking_name ?? prev.ranking?.ranking_name,
+                    ranking_value: prev.ranking?.ranking_value ?? 1
                 }
             }));
 
@@ -55,12 +85,45 @@ const Review = () => {
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error('Error updating review:', err);
+            setError(err.response?.data?.error || 'Failed to update review');
         } finally {
             setSubmitting(false);
         }
     };
 
+    // Show loading spinner while fetching
     if (loading) {
+        return <Spinner />;
+    }
+
+    // Show error state if fetch failed
+    if (error && !movie) {
+        return (
+            <div className="review-container">
+                <div className="review-wrapper">
+                    <button 
+                        className="back-button"
+                        onClick={() => navigate('/')}
+                    >
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                        Back to Movies
+                    </button>
+                    <div className="error-state">
+                        <p className="error-message">{error}</p>
+                        <button 
+                            className="retry-button"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Don't render content until movie data is loaded
+    if (!movie) {
         return <Spinner />;
     }
 

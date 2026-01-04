@@ -69,6 +69,11 @@ func main() {
 
 	}()
 
+	// Create indexes for movies collection
+	if err := database.CreateMovieIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create movie indexes: %v", err)
+	}
+
 	routes.SetupUnProtectedRoutes(router, client)
 	routes.SetupProtectedRoutes(router, client)
 

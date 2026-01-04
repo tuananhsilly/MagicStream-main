@@ -7,17 +7,20 @@
 }
 
 :root {
-    /* Enhanced Colors for Better Contrast */
+    /* Color Palette */
     --primary: #3B82F6;
     --primary-light: #60A5FA;
     --primary-dark: #2563EB;
     --secondary: #8B5CF6;
     --accent: #F97316;
     --accent-light: #FB923C;
+    --error: #EF4444;
+    --error-light: #FCA5A5;
     
     /* Background Colors */
     --bg-dark: #0A0E27;
     --bg-card: #1A1F3A;
+    --bg-elevated: rgba(26, 31, 58, 0.5);
     --bg-overlay: rgba(10, 14, 39, 0.85);
     
     /* Text Colors - Enhanced Contrast */
@@ -25,18 +28,40 @@
     --text-secondary: #CBD5E1;
     --text-muted: #94A3B8;
     --text-dim: #64748B;
-    --border: rgba(255, 255, 255, 0.1);
-    --border-light: rgba(255, 255, 255, 0.15);
+    
+    /* Borders */
+    --border: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.12);
+    --border-medium: rgba(255, 255, 255, 0.15);
     
     /* Typography */
     --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;
     --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    /* Spacing Scale (8px base) */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+    
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --radius-xl: 12px;
     
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
     --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {

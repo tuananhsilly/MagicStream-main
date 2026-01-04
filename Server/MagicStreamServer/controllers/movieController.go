@@ -31,22 +31,132 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
 
-		cursor, err := movieCollection.Find(ctx, bson.D{})
+		// Parse query parameters
+		query := c.Query("q")
+		genreIDStr := c.Query("genre_id")
+		rankingMaxStr := c.Query("ranking_max")
+		sortParam := c.Query("sort")
+		limitStr := c.DefaultQuery("limit", "20")
+		pageStr := c.DefaultQuery("page", "1")
 
+		// Parse limit (default 20, max 100)
+		limit, err := strconv.ParseInt(limitStr, 10, 64)
+		if err != nil || limit < 1 {
+			limit = 20
+		}
+		if limit > 100 {
+			limit = 100
+		}
+
+		// Parse page (default 1)
+		page, err := strconv.ParseInt(pageStr, 10, 64)
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		// Build filter
+		filter := bson.D{}
+
+		// Title search (case-insensitive regex)
+		if query != "" {
+			// Escape special regex characters
+			escapedQuery := strings.ReplaceAll(strings.ReplaceAll(query, "\\", "\\\\"), ".", "\\.")
+			filter = append(filter, bson.E{
+				Key: "title",
+				Value: bson.D{
+					{Key: "$regex", Value: escapedQuery},
+					{Key: "$options", Value: "i"},
+				},
+			})
+		}
+
+		// Genre filter (by genre_id)
+		if genreIDStr != "" {
+			genreID, err := strconv.Atoi(genreIDStr)
+			if err == nil {
+				filter = append(filter, bson.E{
+					Key: "genre.genre_id",
+					Value: genreID,
+				})
+			}
+		}
+
+		// Ranking filter (ranking_value <= ranking_max)
+		if rankingMaxStr != "" {
+			rankingMax, err := strconv.Atoi(rankingMaxStr)
+			if err == nil && rankingMax > 0 {
+				filter = append(filter, bson.E{
+					Key: "ranking.ranking_value",
+					Value: bson.D{
+						{Key: "$lte", Value: rankingMax},
+					},
+				})
+			}
+		}
+
+		// Build sort options
+		findOptions := options.Find()
+		switch sortParam {
+		case "top_ranked":
+			// Best ranking first (lower ranking_value = better)
+			findOptions.SetSort(bson.D{{Key: "ranking.ranking_value", Value: 1}})
+		case "az":
+			// Title A-Z (case-insensitive)
+			findOptions.SetSort(bson.D{{Key: "title", Value: 1}})
+		case "za":
+			// Title Z-A (case-insensitive)
+			findOptions.SetSort(bson.D{{Key: "title", Value: -1}})
+		default:
+			// Default: no sort (or maintain existing behavior)
+		}
+
+		// Pagination
+		skip := (page - 1) * limit
+		findOptions.SetSkip(skip)
+		findOptions.SetLimit(limit)
+
+		// Count total matching documents for pagination
+		total, err := movieCollection.CountDocuments(ctx, filter)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count movies."})
+			return
+		}
+
+		// Find movies
+		cursor, err := movieCollection.Find(ctx, filter, findOptions)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch movies."})
+			return
 		}
 		defer cursor.Close(ctx)
 
 		var movies []models.Movie
-
 		if err = cursor.All(ctx, &movies); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode movies."})
 			return
 		}
 
-		c.JSON(http.StatusOK, movies)
+		// Calculate total pages
+		totalPages := int64(0)
+		if limit > 0 {
+			totalPages = (total + limit - 1) / limit
+		}
 
+		// Backward compatibility: if no params provided, return array directly
+		hasParams := query != "" || genreIDStr != "" || rankingMaxStr != "" || sortParam != "" || limitStr != "20" || pageStr != "1"
+		if !hasParams {
+			c.JSON(http.StatusOK, movies)
+			return
+		}
+
+		// Return paginated response
+		c.JSON(http.StatusOK, gin.H{
+			"items":      movies,
+			"page":       page,
+			"limit":      limit,
+			"total":      total,
+			"totalPages": totalPages,
+		})
 	}
 }
 
