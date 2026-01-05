@@ -1,8 +1,13 @@
 /* Prevent layout shift - use opacity/transform without scale */
+.movie-card-wrapper {
+    height: 100%;
+}
+
 .movie-card-link {
     text-decoration: none;
     color: inherit;
     display: block;
+    height: 100%;
 }
 
 .movie-card {

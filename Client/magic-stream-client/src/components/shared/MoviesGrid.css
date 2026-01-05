@@ -1,0 +1,31 @@
+.movies-grid {
+    --grid-gap: 1.25rem;
+    display: grid;
+    gap: var(--grid-gap);
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    align-items: stretch;
+}
+
+@media (min-width: 640px) {
+    .movies-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .movies-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .movies-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Allow contexts to tighten spacing without redefining the grid */
+.movies-grid.is-compact {
+    --grid-gap: 1rem;
+}
+

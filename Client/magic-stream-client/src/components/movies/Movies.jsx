@@ -1,4 +1,5 @@
 import Movie from '../movie/Movie';
+import '../shared/MoviesGrid.css';
 import './Movies.css';
 
 const Movies = ({ movies, updateMovieReview, message, total }) => {
@@ -18,10 +19,10 @@ const Movies = ({ movies, updateMovieReview, message, total }) => {
                             </p>
                         </div>
                         
-                        <div className="row movies-grid">
+                        <div className="movies-grid">
                             {movies.map((movie) => (
                                 <Movie 
-                                    key={movie._id} 
+                                    key={movie._id || movie.imdb_id} 
                                     updateMovieReview={updateMovieReview} 
                                     movie={movie} 
                                 />

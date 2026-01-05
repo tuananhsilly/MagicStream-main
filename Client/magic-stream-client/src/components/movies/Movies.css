@@ -35,16 +35,6 @@
     font-weight: 400;
 }
 
-.movies-grid {
-    --gutter: 1.25rem;
-    margin: 0 calc(var(--gutter) / -2);
-}
-
-.movies-grid > * {
-    padding: 0 calc(var(--gutter) / 2);
-    margin-bottom: var(--gutter);
-}
-
 /* Empty State */
 .empty-state {
     display: flex;
@@ -91,7 +81,4 @@
         font-size: 0.85rem;
     }
 
-    .movies-grid {
-        --gutter: 1rem;
-    }
 }

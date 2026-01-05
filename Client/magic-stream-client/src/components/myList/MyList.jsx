@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../../hooks/useAxiosPrivate';
 import Spinner from '../spinner/Spinner';
 import Movie from '../movie/Movie';
+import '../shared/MoviesGrid.css';
 import './MyList.css';
 
 const MyList = () => {
@@ -77,14 +78,13 @@ const MyList = () => {
                         </button>
                     </div>
                 ) : (
-                    <div className="row movies-grid">
+                    <div className="movies-grid">
                         {movies.map((movie) => (
-                            <div key={movie._id || movie.imdb_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                                <Movie 
-                                    movie={movie}
-                                    onRemoveFromList={handleRemoveFromList}
-                                />
-                            </div>
+                            <Movie 
+                                key={movie._id || movie.imdb_id}
+                                movie={movie}
+                                onRemoveFromList={handleRemoveFromList}
+                            />
                         ))}
                     </div>
                 )}

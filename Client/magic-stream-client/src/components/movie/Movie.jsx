@@ -23,7 +23,7 @@ const Movie = ({ movie, updateMovieReview, onRemoveFromList }) => {
         }
     };
     return (
-        <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <article className="movie-card-wrapper">
             <Link
                 to={`/stream/${movie.youtube_id}`}
                 className="movie-card-link"
@@ -80,7 +80,7 @@ const Movie = ({ movie, updateMovieReview, onRemoveFromList }) => {
                     )}
                 </div>
             </Link>
-        </div>
+        </article>
     );
 };
 

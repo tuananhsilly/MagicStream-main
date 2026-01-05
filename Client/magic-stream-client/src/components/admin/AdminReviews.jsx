@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faEdit } from '@fortawesome/free-solid-svg-icons';
 import useAxiosPrivate from '../../hooks/useAxiosPrivate';
 import Spinner from '../spinner/Spinner';
+import '../shared/MoviesGrid.css';
 import './AdminReviews.css';
 
 const AdminReviews = () => {

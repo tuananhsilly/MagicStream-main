@@ -90,10 +90,6 @@
     margin-bottom: 1.5rem;
 }
 
-.movies-grid {
-    margin: 0;
-}
-
 @media (max-width: 768px) {
     .my-list-container {
         padding: 0 1rem;
@@ -102,5 +98,6 @@
     .my-list-title {
         font-size: 1.75rem;
     }
+
 }
 
