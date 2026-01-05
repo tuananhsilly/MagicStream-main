@@ -24,6 +24,9 @@ import (
 
 var validate = validator.New()
 
+// Rate limiter for OpenAI review ranking calls (5 requests per minute per user)
+var reviewRankingLimiter = utils.NewRateLimiter(5, time.Minute)
+
 func GetMovies(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c, 100*time.Second)
@@ -36,16 +39,33 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 		genreIDStr := c.Query("genre_id")
 		rankingMaxStr := c.Query("ranking_max")
 		sortParam := c.Query("sort")
-		limitStr := c.DefaultQuery("limit", "20")
-		pageStr := c.DefaultQuery("page", "1")
-
-		// Parse limit (default 20, max 100)
-		limit, err := strconv.ParseInt(limitStr, 10, 64)
-		if err != nil || limit < 1 {
-			limit = 20
+		limitStr := c.Query("limit")
+		pageStr := c.Query("page")
+		
+		// Check if pagination params were explicitly provided
+		hasPaginationParams := limitStr != "" || pageStr != ""
+		
+		// Set defaults if not provided
+		if limitStr == "" {
+			limitStr = "20"
 		}
-		if limit > 100 {
-			limit = 100
+		if pageStr == "" {
+			pageStr = "1"
+		}
+
+		// Parse limit (default 20, allow larger exports up to 500; "all" fetches everything)
+		var limit int64
+		if strings.EqualFold(limitStr, "all") {
+			limit = 0 // 0 means no limit in Mongo
+		} else {
+			parsedLimit, err := strconv.ParseInt(limitStr, 10, 64)
+			if err != nil || parsedLimit < 1 {
+				parsedLimit = 20
+			}
+			if parsedLimit > 500 {
+				parsedLimit = 500
+			}
+			limit = parsedLimit
 		}
 
 		// Parse page (default 1)
@@ -111,9 +131,11 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 		}
 
 		// Pagination
-		skip := (page - 1) * limit
-		findOptions.SetSkip(skip)
-		findOptions.SetLimit(limit)
+		if limit > 0 {
+			skip := (page - 1) * limit
+			findOptions.SetSkip(skip)
+			findOptions.SetLimit(limit)
+		}
 
 		// Count total matching documents for pagination
 		total, err := movieCollection.CountDocuments(ctx, filter)
@@ -137,13 +159,13 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 		}
 
 		// Calculate total pages
-		totalPages := int64(0)
+		totalPages := int64(1)
 		if limit > 0 {
 			totalPages = (total + limit - 1) / limit
 		}
 
 		// Backward compatibility: if no params provided, return array directly
-		hasParams := query != "" || genreIDStr != "" || rankingMaxStr != "" || sortParam != "" || limitStr != "20" || pageStr != "1"
+		hasParams := query != "" || genreIDStr != "" || rankingMaxStr != "" || sortParam != "" || hasPaginationParams
 		if !hasParams {
 			c.JSON(http.StatusOK, movies)
 			return
@@ -217,17 +239,139 @@ func AddMovie(client *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
+func UpdateMovie(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c, 100*time.Second)
+		defer cancel()
 
-		role, err := utils.GetRoleFromContext(c)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Role not found in context"})
+		movieID := c.Param("imdb_id")
+		if movieID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Movie ID is required"})
 			return
 		}
 
-		if role != "ADMIN" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User must be part of the ADMIN role"})
+		// Define update struct with optional fields
+		var updateData struct {
+			Title       *string    `json:"title"`
+			PosterPath  *string    `json:"poster_path"`
+			YouTubeID   *string    `json:"youtube_id"`
+			Genre       *[]models.Genre `json:"genre"`
+			AdminReview *string    `json:"admin_review"`
+			Ranking     *models.Ranking `json:"ranking"`
+		}
+
+		if err := c.ShouldBindJSON(&updateData); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input", "details": err.Error()})
+			return
+		}
+
+		movieCollection := database.OpenCollection("movies", client)
+
+		// Check if movie exists
+		var existingMovie models.Movie
+		err := movieCollection.FindOne(ctx, bson.D{{Key: "imdb_id", Value: movieID}}).Decode(&existingMovie)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch movie"})
+			return
+		}
+
+		// Build update document with only provided fields
+		update := bson.M{"$set": bson.M{}}
+
+		if updateData.Title != nil {
+			if len(*updateData.Title) < 2 || len(*updateData.Title) > 500 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Title must be between 2 and 500 characters"})
+				return
+			}
+			update["$set"].(bson.M)["title"] = *updateData.Title
+		}
+
+		if updateData.PosterPath != nil {
+			if len(*updateData.PosterPath) == 0 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Poster path cannot be empty"})
+				return
+			}
+			update["$set"].(bson.M)["poster_path"] = *updateData.PosterPath
+		}
+
+		if updateData.YouTubeID != nil {
+			if len(*updateData.YouTubeID) == 0 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "YouTube ID cannot be empty"})
+				return
+			}
+			update["$set"].(bson.M)["youtube_id"] = *updateData.YouTubeID
+		}
+
+		if updateData.Genre != nil {
+			if len(*updateData.Genre) == 0 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "At least one genre is required"})
+				return
+			}
+			update["$set"].(bson.M)["genre"] = *updateData.Genre
+		}
+
+		if updateData.AdminReview != nil {
+			update["$set"].(bson.M)["admin_review"] = *updateData.AdminReview
+		}
+
+		if updateData.Ranking != nil {
+			// Validate ranking
+			if updateData.Ranking.RankingValue < 1 || updateData.Ranking.RankingValue > 5 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Ranking value must be between 1 and 5"})
+				return
+			}
+			update["$set"].(bson.M)["ranking"] = *updateData.Ranking
+		}
+
+		// Only update if there are fields to update
+		if len(update["$set"].(bson.M)) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No fields provided to update"})
+			return
+		}
+
+		filter := bson.D{{Key: "imdb_id", Value: movieID}}
+		result, err := movieCollection.UpdateOne(ctx, filter, update)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update movie"})
+			return
+		}
+
+		if result.MatchedCount == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
+			return
+		}
+
+		// Fetch and return updated movie
+		var updatedMovie models.Movie
+		err = movieCollection.FindOne(ctx, filter).Decode(&updatedMovie)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": "Movie updated successfully", "matched_count": result.MatchedCount})
+			return
+		}
+
+		c.JSON(http.StatusOK, updatedMovie)
+	}
+}
+
+func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Role check is now handled by RequireAdmin middleware, but keep for extra safety
+		userId, err := utils.GetUserIdFromContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+			return
+		}
+
+		// Rate limiting: check if user has exceeded limit
+		if !reviewRankingLimiter.Allow(userId) {
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"error": "Rate limit exceeded. Please wait before submitting another review ranking update.",
+			})
 			return
 		}
 
@@ -248,9 +392,14 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 			return
 		}
+		
+		// Get review ranking with timeout and error handling
 		sentiment, rankVal, err := GetReviewRanking(req.AdminReview, client, c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting review ranking"})
+			log.Printf("Error getting review ranking: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to process review ranking. Please try again later.",
+			})
 			return
 		}
 
@@ -315,34 +464,74 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 	OpenAiApiKey := os.Getenv("OPENAI_API_KEY")
 
 	if OpenAiApiKey == "" {
-		return "", 0, errors.New("could not read OPENAI_API_KEY")
+		return "", 0, errors.New("OPENAI_API_KEY not configured")
 	}
 
 	llm, err := openai.New(openai.WithToken(OpenAiApiKey))
 
 	if err != nil {
-		return "", 0, err
+		return "", 0, errors.New("failed to initialize OpenAI client")
 	}
 
 	base_prompt_template := os.Getenv("BASE_PROMPT_TEMPLATE")
+	if base_prompt_template == "" {
+		return "", 0, errors.New("BASE_PROMPT_TEMPLATE not configured")
+	}
 
 	base_prompt := strings.Replace(base_prompt_template, "{rankings}", sentimentDelimited, 1)
 
-	response, err := llm.Call(c, base_prompt+admin_review)
+	// Create context with timeout for OpenAI call (30 seconds)
+	ctx, cancel := context.WithTimeout(c, 30*time.Second)
+	defer cancel()
+
+	response, err := llm.Call(ctx, base_prompt+admin_review)
 
 	if err != nil {
-		return "", 0, err
+		// Check if timeout occurred
+		if ctx.Err() == context.DeadlineExceeded {
+			return "", 0, errors.New("OpenAI request timed out")
+		}
+		return "", 0, errors.New("OpenAI API error: " + err.Error())
 	}
+
+	// Normalize response: trim whitespace and handle case-insensitive matching
+	response = strings.TrimSpace(response)
 	rankVal := 0
 
+	// Try exact match first
 	for _, ranking := range rankings {
-		if ranking.RankingName == response {
+		if strings.EqualFold(ranking.RankingName, response) {
 			rankVal = ranking.RankingValue
-			break
+			return ranking.RankingName, rankVal, nil // Return normalized name
 		}
 	}
-	return response, rankVal, nil
 
+	// If no exact match, try partial match (in case OpenAI returns something like "Excellent!" or "Excellent movie")
+	for _, ranking := range rankings {
+		if strings.Contains(strings.ToLower(response), strings.ToLower(ranking.RankingName)) {
+			rankVal = ranking.RankingValue
+			return ranking.RankingName, rankVal, nil
+		}
+	}
+
+	// Fallback: if no match found, return "Okay" (middle ranking)
+	log.Printf("Warning: OpenAI returned unknown ranking '%s', defaulting to 'Okay'", response)
+	for _, ranking := range rankings {
+		if ranking.RankingValue == 3 { // Default to "Okay"
+			return ranking.RankingName, ranking.RankingValue, nil
+		}
+	}
+
+	// Last resort: return first valid ranking
+	if len(rankings) > 0 {
+		for _, ranking := range rankings {
+			if ranking.RankingValue != 999 {
+				return ranking.RankingName, ranking.RankingValue, nil
+			}
+		}
+	}
+
+	return "", 0, errors.New("no valid ranking found")
 }
 
 func GetRankings(client *mongo.Client, c *gin.Context) ([]models.Ranking, error) {

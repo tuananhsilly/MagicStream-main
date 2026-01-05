@@ -1,0 +1,325 @@
+.admin-movies {
+    min-height: calc(100vh - 80px);
+    padding: 2rem 0;
+    background: linear-gradient(180deg, #0A0E27 0%, #1A1F3A 100%);
+}
+
+/* Unified loading surface for admin pages */
+.admin-page-loading {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #0A0E27 0%, #1A1F3A 100%);
+    padding: 2rem 1.5rem;
+}
+
+.admin-movies-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.admin-movies-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-movies-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.admin-movies-subtitle {
+    font-size: 0.9rem;
+    color: #94A3B8;
+    margin: 0;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: rgba(26, 31, 58, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #CBD5E1;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #FFFFFF;
+}
+
+.admin-movies-search {
+    margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+    position: relative;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    background: rgba(26, 31, 58, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #F8FAFC;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3B82F6;
+    background: rgba(26, 31, 58, 0.7);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #FCA5A5;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.admin-movies-table-wrapper {
+    background: rgba(26, 31, 58, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.admin-movies-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-movies-table thead {
+    background: rgba(10, 14, 39, 0.6);
+}
+
+.admin-movies-table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #CBD5E1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-movies-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #E2E8F0;
+    font-size: 0.9rem;
+}
+
+.admin-movies-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.page-btn {
+    padding: 0.6rem 1.1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(26, 31, 58, 0.6);
+    color: #F8FAFC;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    border-color: #60A5FA;
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.page-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.page-status {
+    color: #94A3B8;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.movie-title-cell {
+    min-width: 250px;
+}
+
+.movie-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.movie-thumbnail {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.imdb-id-cell {
+    font-family: monospace;
+    color: #94A3B8;
+    font-size: 0.85rem;
+}
+
+.genres-cell {
+    min-width: 150px;
+}
+
+.genre-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 4px;
+    color: #60A5FA;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.ranking-cell {
+    min-width: 100px;
+}
+
+.ranking-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.ranking-1 {
+    background: rgba(34, 197, 94, 0.15);
+    color: #86EFAC;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.ranking-2 {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93C5FD;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.ranking-3 {
+    background: rgba(251, 191, 36, 0.15);
+    color: #FDE047;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.ranking-4 {
+    background: rgba(249, 115, 22, 0.15);
+    color: #FDBA74;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.ranking-5 {
+    background: rgba(239, 68, 68, 0.15);
+    color: #FCA5A5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.actions-cell {
+    min-width: 100px;
+}
+
+.edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 6px;
+    color: #60A5FA;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3B82F6;
+    color: #FFFFFF;
+}
+
+.edit-btn:focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #94A3B8;
+    padding: 3rem !important;
+}
+
+@media (max-width: 768px) {
+    .admin-movies-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .admin-movies-table {
+        font-size: 0.8rem;
+    }
+
+    .admin-movies-table th,
+    .admin-movies-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .movie-thumbnail {
+        width: 30px;
+        height: 45px;
+    }
+}
+

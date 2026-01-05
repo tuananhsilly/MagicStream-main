@@ -42,8 +42,16 @@ const Home =({updateMovieReview}) => {
                 if (debouncedSearchQuery) params.q = debouncedSearchQuery;
                 if (selectedGenreId) params.genre_id = selectedGenreId;
                 if (sortValue) params.sort = sortValue;
-                params.limit = 20;
-                params.page = page;
+                
+                // If no filters/search applied, fetch all movies; otherwise use pagination
+                const hasFilters = debouncedSearchQuery || selectedGenreId || sortValue;
+                if (hasFilters) {
+                    params.limit = 20;
+                    params.page = page;
+                } else {
+                    params.limit = "all"; // Fetch all movies when no filters
+                    params.page = 1; // Always page 1 when showing all
+                }
 
                 const response = await axiosClient.get('/movies', { params });
                 
@@ -125,8 +133,8 @@ const Home =({updateMovieReview}) => {
                         total={total}
                     />
                     
-                    {/* Pagination */}
-                    {totalPages > 1 && (
+                    {/* Pagination - only show when filters/search are applied */}
+                    {totalPages > 1 && (debouncedSearchQuery || selectedGenreId || sortValue) && (
                         <div className="pagination-container">
                             <div className="pagination-info">
                                 Showing page {page} of {totalPages} ({total} total)
