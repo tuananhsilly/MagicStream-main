@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -53,12 +54,31 @@ func main() {
 	} else {
 		origins = defaultOrigins
 	}
+	originSet := make(map[string]struct{}, len(origins))
 	for _, o := range origins {
 		log.Println("Allowed Origin:", o)
+		originSet[o] = struct{}{}
 	}
 
+	vercelPreview := regexp.MustCompile(`^https://[-a-z0-9]+\.vercel\.app$`)
+	onRender := regexp.MustCompile(`^https://[-a-z0-9]+\.onrender\.com$`)
+
 	config := cors.Config{}
-	config.AllowOrigins = origins
+	// Keep list for transparency, but use AllowOriginFunc to permit previews and exact matches
+	config.AllowOriginFunc = func(origin string) bool {
+		if _, ok := originSet[origin]; ok {
+			return true
+		}
+		// Allow Vercel previews and Render-hosted frontends
+		if vercelPreview.MatchString(origin) || onRender.MatchString(origin) {
+			return true
+		}
+		// Allow localhost variants if not explicitly listed
+		if strings.HasPrefix(origin, "http://localhost:") {
+			return true
+		}
+		return false
+	}
 	config.AllowMethods = []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
 	config.ExposeHeaders = []string{"Content-Length"}
