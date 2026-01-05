@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/routes"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/database"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -72,6 +72,41 @@ func main() {
 	// Create indexes for movies collection
 	if err := database.CreateMovieIndexes(client); err != nil {
 		log.Printf("Warning: Failed to create movie indexes: %v", err)
+	}
+
+	// Create indexes for watchlists collection
+	if err := database.CreateWatchlistIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create watchlist indexes: %v", err)
+	}
+
+	// Create indexes for plans collection
+	if err := database.CreatePlanIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create plan indexes: %v", err)
+	}
+
+	// Create indexes for subscriptions collection
+	if err := database.CreateSubscriptionIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create subscription indexes: %v", err)
+	}
+
+	// Create indexes for ratings collection
+	if err := database.CreateRatingIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create rating indexes: %v", err)
+	}
+
+	// Create indexes for password_resets collection
+	if err := database.CreatePasswordResetIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create password reset indexes: %v", err)
+	}
+
+	// Create indexes for email_verifications collection
+	if err := database.CreateEmailVerificationIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create email verification indexes: %v", err)
+	}
+
+	// Create indexes for payments collection
+	if err := database.CreatePaymentIndexes(client); err != nil {
+		log.Printf("Warning: Failed to create payment indexes: %v", err)
 	}
 
 	routes.SetupUnProtectedRoutes(router, client)

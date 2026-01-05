@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/models"
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/database"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/models"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -41,10 +41,10 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 		sortParam := c.Query("sort")
 		limitStr := c.Query("limit")
 		pageStr := c.Query("page")
-		
+
 		// Check if pagination params were explicitly provided
 		hasPaginationParams := limitStr != "" || pageStr != ""
-		
+
 		// Set defaults if not provided
 		if limitStr == "" {
 			limitStr = "20"
@@ -61,7 +61,7 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 			parsedLimit, err := strconv.ParseInt(limitStr, 10, 64)
 			if err != nil || parsedLimit < 1 {
 				parsedLimit = 20
-			}
+		}
 			if parsedLimit > 500 {
 				parsedLimit = 500
 			}
@@ -95,7 +95,7 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 			genreID, err := strconv.Atoi(genreIDStr)
 			if err == nil {
 				filter = append(filter, bson.E{
-					Key: "genre.genre_id",
+					Key:   "genre.genre_id",
 					Value: genreID,
 				})
 			}
@@ -132,9 +132,9 @@ func GetMovies(client *mongo.Client) gin.HandlerFunc {
 
 		// Pagination
 		if limit > 0 {
-			skip := (page - 1) * limit
-			findOptions.SetSkip(skip)
-			findOptions.SetLimit(limit)
+		skip := (page - 1) * limit
+		findOptions.SetSkip(skip)
+		findOptions.SetLimit(limit)
 		}
 
 		// Count total matching documents for pagination
@@ -252,11 +252,11 @@ func UpdateMovie(client *mongo.Client) gin.HandlerFunc {
 
 		// Define update struct with optional fields
 		var updateData struct {
-			Title       *string    `json:"title"`
-			PosterPath  *string    `json:"poster_path"`
-			YouTubeID   *string    `json:"youtube_id"`
+			Title       *string         `json:"title"`
+			PosterPath  *string         `json:"poster_path"`
+			YouTubeID   *string         `json:"youtube_id"`
 			Genre       *[]models.Genre `json:"genre"`
-			AdminReview *string    `json:"admin_review"`
+			AdminReview *string         `json:"admin_review"`
 			Ranking     *models.Ranking `json:"ranking"`
 		}
 
@@ -565,12 +565,19 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "User Id not found in context"})
 		}
 
-		favourite_genres, err := GetUsersFavouriteGenres(userId, client, c)
+		favouriteGenreIds, err := GetUsersFavouriteGenreIds(userId, client, c)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		// If user has no favourite genres, return empty array
+		if len(favouriteGenreIds) == 0 {
+			c.JSON(http.StatusOK, []models.Movie{})
+			return
+		}
+
 		err = godotenv.Load(".env")
 		if err != nil {
 			log.Println("Warning: .env file not found")
@@ -589,9 +596,10 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 
 		findOptions.SetLimit(recommendedMovieLimitVal)
 
+		// Filter by genre_id instead of genre_name to avoid naming mismatches
 		filter := bson.D{
-			{Key: "genre.genre_name", Value: bson.D{
-				{Key: "$in", Value: favourite_genres},
+			{Key: "genre.genre_id", Value: bson.D{
+				{Key: "$in", Value: favouriteGenreIds},
 			}},
 		}
 
@@ -618,8 +626,63 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context) ([]string, error) {
+// GetUsersFavouriteGenreIds returns user's favourite genre IDs (for recommendation matching)
+func GetUsersFavouriteGenreIds(userId string, client *mongo.Client, c *gin.Context) ([]int, error) {
+	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
+	defer cancel()
 
+	filter := bson.D{{Key: "user_id", Value: userId}}
+
+	projection := bson.M{
+		"favourite_genres.genre_id": 1,
+		"_id":                       0,
+	}
+
+	opts := options.FindOne().SetProjection(projection)
+	var result bson.M
+
+	var userCollection *mongo.Collection = database.OpenCollection("users", client)
+	err := userCollection.FindOne(ctx, filter, opts).Decode(&result)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return []int{}, nil
+		}
+		return []int{}, err
+	}
+
+	favGenresArray, ok := result["favourite_genres"].(bson.A)
+
+	if !ok {
+		return []int{}, errors.New("unable to retrieve favourite genres for user")
+	}
+
+	var genreIds []int
+
+	for _, item := range favGenresArray {
+		if genreMap, ok := item.(bson.D); ok {
+			for _, elem := range genreMap {
+				if elem.Key == "genre_id" {
+					// Handle both int32 and int64 from MongoDB
+					switch v := elem.Value.(type) {
+					case int:
+						genreIds = append(genreIds, v)
+					case int32:
+						genreIds = append(genreIds, int(v))
+					case int64:
+						genreIds = append(genreIds, int(v))
+					}
+				}
+			}
+		}
+	}
+
+	return genreIds, nil
+}
+
+// GetUsersFavouriteGenres (deprecated - kept for backward compatibility if needed)
+// Returns user's favourite genre names
+func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context) ([]string, error) {
 	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 	defer cancel()
 
@@ -640,6 +703,7 @@ func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context
 		if err == mongo.ErrNoDocuments {
 			return []string{}, nil
 		}
+		return []string{}, err
 	}
 
 	favGenresArray, ok := result["favourite_genres"].(bson.A)
@@ -663,7 +727,6 @@ func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context
 	}
 
 	return genreNames, nil
-
 }
 
 func GetGenres(client *mongo.Client) gin.HandlerFunc {

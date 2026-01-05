@@ -60,4 +60,3 @@ func (rl *RateLimiter) Reset() {
 	defer rl.mu.Unlock()
 	rl.requests = make(map[string][]time.Time)
 }
-

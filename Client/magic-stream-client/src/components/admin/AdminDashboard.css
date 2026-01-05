@@ -10,6 +10,103 @@
     padding: 0 1.5rem;
 }
 
+.admin-stats-section {
+    margin-bottom: 2.25rem;
+}
+
+.admin-stats-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-stats-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    letter-spacing: -0.01em;
+}
+
+.admin-stats-updated {
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.admin-stats-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #FCA5A5;
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.admin-stats-loading .spinner-container {
+    min-height: 220px;
+}
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.admin-stat-card {
+    background: rgba(26, 31, 58, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: all 0.25s ease;
+}
+
+.admin-stat-card:hover {
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(26, 31, 58, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+}
+
+.admin-stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    color: #60A5FA;
+    font-size: 1.25rem;
+    flex: 0 0 auto;
+}
+
+.admin-stat-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.admin-stat-label {
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.admin-stat-value {
+    color: #F8FAFC;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
 .admin-header {
     display: flex;
     justify-content: space-between;
@@ -106,6 +203,12 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+    }
+
+    .admin-stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
     }
 
     .admin-nav {

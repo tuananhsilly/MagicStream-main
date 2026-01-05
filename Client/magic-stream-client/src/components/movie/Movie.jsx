@@ -1,9 +1,27 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faStar, faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useWatchlist } from '../../context/WatchlistProvider';
+import useAuth from '../../hooks/useAuth';
 import './Movie.css';
 
-const Movie = ({ movie, updateMovieReview }) => {
+const Movie = ({ movie, updateMovieReview, onRemoveFromList }) => {
+    const { isInWatchlist, toggleWatchlist } = useWatchlist();
+    const { auth } = useAuth();
+    const inWatchlist = isInWatchlist(movie.imdb_id);
+
+    const handleToggleWatchlist = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!auth) {
+            return; // Should not happen if button is hidden
+        }
+        const success = await toggleWatchlist(movie.imdb_id);
+        if (success && onRemoveFromList) {
+            // If removing from MyList page, call the callback
+            onRemoveFromList(movie.imdb_id);
+        }
+    };
     return (
         <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
             <Link
@@ -29,6 +47,18 @@ const Movie = ({ movie, updateMovieReview }) => {
                                 <FontAwesomeIcon icon={faStar} className="badge-icon" />
                                 {movie.ranking.ranking_name}
                             </div>
+                        )}
+                        
+                        {/* My List toggle button - only show for authenticated users */}
+                        {auth && (
+                            <button
+                                className={`my-list-toggle ${inWatchlist ? 'in-list' : ''}`}
+                                onClick={handleToggleWatchlist}
+                                aria-label={inWatchlist ? 'Remove from My List' : 'Add to My List'}
+                                title={inWatchlist ? 'Remove from My List' : 'Add to My List'}
+                            >
+                                <FontAwesomeIcon icon={inWatchlist ? faCheck : faPlus} />
+                            </button>
                         )}
                     </div>
 

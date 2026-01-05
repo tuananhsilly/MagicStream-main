@@ -46,8 +46,8 @@ const Home =({updateMovieReview}) => {
                 // If no filters/search applied, fetch all movies; otherwise use pagination
                 const hasFilters = debouncedSearchQuery || selectedGenreId || sortValue;
                 if (hasFilters) {
-                    params.limit = 20;
-                    params.page = page;
+                params.limit = 20;
+                params.page = page;
                 } else {
                     params.limit = "all"; // Fetch all movies when no filters
                     params.page = 1; // Always page 1 when showing all

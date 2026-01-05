@@ -106,6 +106,55 @@
     font-size: 0.7rem;
 }
 
+/* My List Toggle Button */
+.my-list-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(10, 14, 39, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 3;
+    font-size: 0.875rem;
+    padding: 0;
+}
+
+.my-list-toggle:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.1);
+}
+
+.my-list-toggle.in-list {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #86EFAC;
+}
+
+.my-list-toggle.in-list:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #FCA5A5;
+}
+
+.my-list-toggle:focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+}
+
+.my-list-toggle:active {
+    transform: scale(0.95);
+}
+
 /* Movie Info */
 .movie-info {
     padding: 1rem;

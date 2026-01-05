@@ -1,0 +1,106 @@
+.my-list-page {
+    min-height: calc(100vh - 80px);
+    padding: 2rem 0;
+    background: linear-gradient(180deg, #0A0E27 0%, #1A1F3A 100%);
+}
+
+.my-list-loading {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #0A0E27 0%, #1A1F3A 100%);
+}
+
+.my-list-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.my-list-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.my-list-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.my-list-subtitle {
+    font-size: 0.9rem;
+    color: #94A3B8;
+    margin: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94A3B8;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #F8FAFC;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-subtitle {
+    font-size: 1rem;
+    color: #94A3B8;
+    margin: 0 0 2rem 0;
+}
+
+.browse-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    border: 2px solid #3B82F6;
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.browse-btn:hover {
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+    border-color: #60A5FA;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #FCA5A5;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.movies-grid {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .my-list-container {
+        padding: 0 1rem;
+    }
+
+    .my-list-title {
+        font-size: 1.75rem;
+    }
+}
+

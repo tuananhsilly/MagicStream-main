@@ -101,6 +101,144 @@
     margin: 0;
 }
 
+/* Aggregate Rating in Movie Card */
+.aggregate-rating {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avg-rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.avg-star {
+    color: #FBBF24;
+    font-size: 1.25rem;
+}
+
+.avg-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #F8FAFC;
+}
+
+.rating-count {
+    color: #64748B;
+    font-size: 0.9rem;
+}
+
+/* Review Content Area */
+.review-content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* User Rating Section */
+.user-rating-section {
+    background: rgba(26, 31, 58, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.star-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 1rem 0;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0.25rem;
+}
+
+.star-btn:hover {
+    transform: scale(1.15);
+}
+
+.star-btn.filled {
+    color: #FBBF24;
+}
+
+.star-btn:focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.rating-label {
+    margin-left: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FBBF24;
+}
+
+.user-review-textarea {
+    width: 100%;
+    padding: 0.875rem;
+    background: rgba(10, 14, 39, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #F8FAFC;
+    font-size: 0.9rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.user-review-textarea:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.user-review-textarea::placeholder {
+    color: #64748B;
+}
+
+.submit-rating-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+    border: none;
+    border-radius: 8px;
+    color: #0A0E27;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.submit-rating-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+}
+
+.submit-rating-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-rating-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Review Section */
 .review-section {
     background: rgba(26, 31, 58, 0.6);
@@ -108,6 +246,100 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 2rem;
+}
+
+/* Recent Reviews Section */
+.recent-reviews-section {
+    background: rgba(26, 31, 58, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.reviews-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #94A3B8;
+    padding: 2rem;
+    justify-content: center;
+}
+
+.recent-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-item {
+    background: rgba(10, 14, 39, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.review-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.reviewer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.review-item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.review-stars {
+    display: flex;
+    gap: 0.125rem;
+}
+
+.review-stars svg {
+    font-size: 0.875rem;
+}
+
+.review-stars svg.filled {
+    color: #FBBF24;
+}
+
+.review-stars svg.empty {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.review-date {
+    font-size: 0.75rem;
+    color: #64748B;
+}
+
+.review-item-text {
+    color: #CBD5E1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.empty-reviews {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #64748B;
+    text-align: center;
 }
 
 .section-header {

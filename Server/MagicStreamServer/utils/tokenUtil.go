@@ -6,11 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
+	"github.com/tuananhsilly/MagicStream-main/Server/MagicStreamServer/database"
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type SignedDetails struct {
@@ -188,4 +189,13 @@ func ValidateRefreshToken(tokenString string) (*SignedDetails, error) {
 	}
 
 	return claims, nil
+}
+
+// HashPassword hashes a password using bcrypt
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }
