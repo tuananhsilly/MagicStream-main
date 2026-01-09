@@ -19,6 +19,8 @@ import SubscriptionPage from './components/subscription/SubscriptionPage';
 import axiosClient from './api/axiosConfig';
 import useAuth from './hooks/useAuth';
 import StreamMovie from './components/stream/StreamMovie';
+import MyList from './components/myList/MyList';
+import Recommended from './components/recommended/Recommended';
 
 import {Navigate, Route, Routes, useNavigate} from 'react-router-dom'
 
@@ -55,16 +57,13 @@ function App() {
         <Route path="/register" element={<Register/>}></Route>
         <Route path="/login" element={<Login/>}></Route>
 
-        {/* Redirect removed pages */}
-        <Route path="/recommended" element={<Navigate to="/" replace />} />
-        <Route path="/my-list" element={<Navigate to="/" replace />} />
-        <Route path="/admin/reviews" element={<Navigate to="/admin" replace />} />
-
         <Route element = {<RequiredAuth/>}>
             <Route path="/account" element={<Account/>}></Route>
             <Route path="/subscribe" element={<SubscriptionPage/>}></Route>
             <Route path="/review/:imdb_id" element={<Review/>}></Route>
             <Route path="/stream/:yt_id" element={<StreamMovie/>}></Route>
+            <Route path="/mylist" element={<MyList/>}></Route>
+            <Route path="/recommended" element={<Recommended/>}></Route>
         </Route>
         
         {/* Admin routes */}

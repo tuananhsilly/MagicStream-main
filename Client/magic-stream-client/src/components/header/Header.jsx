@@ -4,7 +4,7 @@ import {useNavigate, NavLink} from 'react-router-dom'
 import useAuth from '../../hooks/useAuth';
 import logo from '../../assets/MagicStreamLogo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShieldHalved, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
 import './Header.css';
 
 const Header = ({handleLogout}) => {
@@ -32,6 +32,24 @@ const Header = ({handleLogout}) => {
                     </NavLink>
                     {auth && (
                         <>
+                            {auth.role !== 'ADMIN' && (
+                                <>
+                                    <NavLink 
+                                        to="/recommended" 
+                                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                                    >
+                                        <FontAwesomeIcon icon={faStar} className="nav-icon" />
+                                        <span>Recommended</span>
+                                    </NavLink>
+                                    <NavLink 
+                                        to="/mylist" 
+                                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                                    >
+                                        <FontAwesomeIcon icon={faBookmark} className="nav-icon" />
+                                        <span>My List</span>
+                                    </NavLink>
+                                </>
+                            )}
                             {auth.role === 'ADMIN' && (
                                 <NavLink 
                                     to="/admin" 
@@ -101,6 +119,18 @@ const Header = ({handleLogout}) => {
                     </NavLink>
                     {auth && (
                         <>
+                            {auth.role !== 'ADMIN' && (
+                                <>
+                                    <NavLink to="/recommended" onClick={() => setIsMenuOpen(false)} className="mobile-nav-link">
+                                        <FontAwesomeIcon icon={faStar} className="nav-icon" />
+                                        Recommended
+                                    </NavLink>
+                                    <NavLink to="/mylist" onClick={() => setIsMenuOpen(false)} className="mobile-nav-link">
+                                        <FontAwesomeIcon icon={faBookmark} className="nav-icon" />
+                                        My List
+                                    </NavLink>
+                                </>
+                            )}
                             {auth.role === 'ADMIN' && (
                                 <NavLink to="/admin" onClick={() => setIsMenuOpen(false)} className="mobile-nav-link">
                                     <FontAwesomeIcon icon={faShieldHalved} className="nav-icon" />
