@@ -78,7 +78,7 @@
     align-items: center;
     justify-content: center; /* Center content both horizontally and vertically */
     gap: 0.5rem; /* Comfortable gap between icon and text */
-    line-height: 1.2;
+    line-height: 2.5;
     border: 2px solid rgba(96, 165, 250, 0.7); /* Same border style as btn-outline */
     background: rgba(26, 31, 58, 0.6); /* Same background as btn-outline */
     white-space: nowrap; /* Same as buttons */
